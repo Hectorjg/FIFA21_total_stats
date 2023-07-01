@@ -1,0 +1,62 @@
+visual_df = df.drop(['position', 'age', 'growth', 'bp'], axis = 1)
+
+categorical= data.select_dtypes(include='object')
+
+#Here we create a plot to see if the data looks like a standart deviation or if we need to transform data
+for i in visual_df.columns:
+    sns.distplot(visual_df[i])
+    plt.xlabel(i)
+    plt.ylabel('count')
+    plt.title(i, size=15)
+    plt.show()
+    
+#Now we check for the correlation between the features and with the target
+sns.heatmap(visual_df.corr(), annot=True)
+
+#Drop the attacking column bc it as a higher correlation with skill, and a lower correlation with the target than skill
+visual_df = visual_df.drop('attacking', axis = 1)
+
+#There were some columns that needed to be transformed, they doesn´t look like a standart deviation but it is very close
+#also, we do not remove any outlier because they came from different data and that will remove a lot of important data
+transformed_df = visual_df
+transformed_df['skill']= transformed_df['skill']**(1/2)
+transformed_df['defending'] = np.log(transformed_df['defending'])
+transformed_df['goalkeeping']= np.log(transformed_df['goalkeeping'])
+
+#Now it looks this way
+for i in transformed_df.columns:
+    sns.distplot(transformed_df[i])
+    plt.xlabel(i)
+    plt.ylabel('count')
+    plt.title(i, size=15)
+    plt.show()
+
+#we drop the position column, it has very ambiguous information, instead we use the bp (best position)
+categorical = categorical.drop(['position'], axis=1)
+
+#To use this columns we needed as a numerical
+categorical['inch_height']=list(map(lambda x: int(x.split('\'')[0])*12+int(x.split('\'')[1].split('"')[0]), categorical['height']))
+categorical['weight']= list(map(lambda x: x.replace('lbs', ''), categorical['weight']))
+categorical['weight']= pd.to_numeric(categorical['weight'], errors = 'coerce')
+categorical['hits']= pd.to_numeric(categorical['hits'], errors = 'coerce')
+median = categorical['hits'].dropna()
+np.median(median)
+categorical['hits'] = categorical['hits'].fillna(7)
+categorical['w/f']= pd.to_numeric(categorical['w/f'].str.replace(" ★", ""), errors = 'coerce')
+categorical['sm']= pd.to_numeric(categorical['sm'].str.replace("★", ""), errors = 'coerce')
+categorical['ir']= pd.to_numeric(categorical['ir'].str.replace(" ★", ""), errors = 'coerce')
+numericals =categorical[['weight', 'w/f', 'sm', 'ir', 'hits', 'inch_height']]
+categorical= categorical.drop(['weight', 'w/f', 'sm', 'ir', 'hits', 'inch_height'], axis=1)
+
+#this are information is usseles fro the target
+categorical = categorical.drop(['height',
+       'ls', 'st', 'rs', 'lw', 'lf', 'cf', 'rf', 'rw', 'lam', 'cam', 'ram',
+       'lm', 'lcm', 'cm', 'rcm', 'rm', 'lwb', 'ldm', 'cdm', 'rdm', 'rwb', 'lb',
+       'lcb', 'cb', 'rcb', 'rb', 'gk'], axis=1)
+
+#This would be the dinal data that we would use for the module
+final_df = pd.concat([numericals, transformed_df], axis=1)
+
+scaled= pd.DataFrame(StandardScaler().fit_transform(final_df.drop('total_stats', axis=1)))
+encoded= pd.DataFrame(OneHotEncoder(drop='first').fit_transform(categorical).toarray())
+fifa= pd.concat([encoded, scaled], axis=1)

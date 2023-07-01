@@ -1,0 +1,28 @@
+data = pd.read_csv('C:/Users/ASUS/Desktop/Hector/mini_project#1/data_mid_bootcamp_project_FIFA_MoneyBall/fifa21_male2.csv')
+
+data.columns=data.columns.str.lower().str.replace(' ', '_')
+
+data.isna().sum()
+
+#the next columns are not important because they have no relevant data for the Linnear regression
+data = data.drop(['name', 'nationality', 'club', 'player_photo', 'club_logo', 
+                               'flag_photo', 'team_&_contract', 'joined', 'loan_date_end', 'value', 'wage', 'release_clause',
+       'contract', 'gender'], axis = 1)
+
+data = data.dropna()
+
+data['position'] = data['position'].replace('ACB', 'CB')
+
+#There are some players who has more than 3 position at the same time, we remove those players with this filter
+data = data[data['position'].str.len() <= 10]
+
+#here we replace the growth with a value of 0, with the mean of the column, this because is not posible for a player
+#to have a value of 0 in that column, and if we drop those 0 we will be loosing a lot of data
+noceros= data
+noceros = noceros[noceros['growth'] > 0]
+x = noceros['growth'].mean()
+data['growth']= data['growth'].replace(0, x)
+
+data = data.sort_values('position')
+
+data= data.reset_index(drop=True)

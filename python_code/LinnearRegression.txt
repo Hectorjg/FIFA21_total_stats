@@ -1,0 +1,9 @@
+y = final_df['total_stats']
+x_train, x_test, y_train, y_test= train_test_split(fifa , y , test_size=.2)
+dt = DecisionTreeRegressor()
+dt.fit(x_train, y_train)
+lm= linear_model.LinearRegression()
+lm.fit(x_train, y_train)
+prediction=lm.predict(x_test)
+
+print(dt.score(x_test, y_test), lm.score(x_test, y_test))

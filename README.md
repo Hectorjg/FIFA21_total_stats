@@ -1,1 +1,12 @@
 # FIFA21_total_stats
+
+The data to analize was taken from the data_mid_bootcamp_project_FIFA_MoneyBall repository from IronHack at github
+By analizing the dataframe we can select a few of them to be the target, in this case I choose the total_stats column as the target because it can be the most clear example of a Linnear Regression, it is a numerical and also because I know what statistics affect it.
+For the data cleanning I realize that 'position' had some irregularities like a position that doesn´t exist and players who have more than 3 positions that is the maxium of positions that the game allows, so I remove them because they were so ambiguous and also because I didn´t lose more than the 2% of the total data.
+I know that the statistics that affect the total_stats are the 'weight', 'w/f', 'sm', 'ir', 'hits', 'inch_height', 'bov', 'skill', 'agility', 'power', 'mentality', 'defending' and 'goalkeeping'. With this information I dived this columns in 2 separated dataframes, one for the numerical called 'visual_df', and one for the categorical named 'categorical'.
+First, I create a distplot of each column in the 'visual_df' to visualize if they look like a standart deviation of if they needed to be transformed. Then I created a new variable 'transformed_df' as a copy of 'visual_data' to store the original data and to do the modifications in it, but after the modifications I use 'transformed_df'.
+I transformed only 3 columns, even if they do not look like a standart deviation, it´s looking better than before, the affected columns were 'skill', 'defending' and 'goalkeeping'.
+Now, I continued with the categorical, so I needed to check for it to have the correct type and no null values in it.
+The columns that suffer some changes in order to use the OneHotEncoder were: 'height', 'weight', 'hits', 'w/f', 'sm' and 'ir'. After this, I move those columns with the columns from 'transformed_df' to a dataframe called 'final_df'.
+Working with 'final_df' I scaled it with the Standart Scaler cause this was the one that fits the most, an then I encoded 'categorical' in order to concat both dataframes in 'fifa'.
+With all this done, i train the module to have the prediction that is the most closer to the actual values, I used the Linnear Regression model.
